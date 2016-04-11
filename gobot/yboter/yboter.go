@@ -1,15 +1,15 @@
-package main
+package yboter
 
 import "github.com/bcspragu/Gobots/game"
 
-//import "github.com/yongbin999/gobot/yboter"
-
-type yboter struct{
+// Bot moves to the center and does nothing else
+type bot struct{
 	targets map[uint32]uint32
 	aggression uint32
+
 }
 
-func (bt *yboter) Act(b *game.Board, r *game.Robot) game.Action {
+func (bot ) Act(b *game.Board, r *game.Robot) game.Action {
 
 	//if enermy adjecent, attack
 	ds := []game.Direction{
@@ -28,11 +28,8 @@ func (bt *yboter) Act(b *game.Board, r *game.Robot) game.Action {
 		}
 	}
 
+
 	var opp *game.Robot
-	opp = nearestOpponent(b, r.Loc)
-		if opp == nil {
-			return game.Action{Kind: game.Wait}
-		}
 
 	// Move to target.
 	// Don't worry about collisions, since we already shot at all neighbors.
@@ -61,7 +58,7 @@ func (bt *yboter) Act(b *game.Board, r *game.Robot) game.Action {
 		}
 	}
 	// TODO: impossibru?
-	//return game.Action{Kind: game.Wait}
+	return game.Action{Kind: game.Wait}
 
 	//else move to center
 	return game.Action{
@@ -107,32 +104,3 @@ func opponentAt(b *game.Board, loc game.Loc) bool {
 //if surrounding boxes enermycount * avg damage > self.hp, suicide. 
 
 //if theres wall go towards it. and for a slope 
-
-//if triagle formed
-
-
-
-
-func main() {
-    game.StartServerForFactory("testing", "IlxVTAKDBsIisHXuGesBcBuds", game.ToFactory(&yboter{}))
-}
-
-
-/*
-when i did ...
-# github.com/bcspragu/Gobots/samplebots
-..\..\bcspragu\Gobots\samplebots\aggro.go:7: undefined: game.Action
-..\..\bcspragu\Gobots\samplebots\aggro.go:17: undefined: game.Action
-..\..\bcspragu\Gobots\samplebots\aggro.go:23: undefined: game.Action
-..\..\bcspragu\Gobots\samplebots\main.go:57: not enough arguments in call to c.RegisterAI
-..\..\bcspragu\Gobots\samplebots\pathfinder.go:9: undefined: game.Action
-..\..\bcspragu\Gobots\samplebots\pathfinder.go:20: undefined: game.Action
-..\..\bcspragu\Gobots\samplebots\pathfinder.go:41: undefined: game.Action
-..\..\bcspragu\Gobots\samplebots\pathfinder.go:52: undefined: game.Action
-..\..\bcspragu\Gobots\samplebots\pathfinder.go:57: undefined: game.Action
-..\..\bcspragu\Gobots\samplebots\pathfinder.go:62: undefined: game.Action
-..\..\bcspragu\Gobots\samplebots\pathfinder.go:62: too many errors
-# github.com/bcspragu/Gobots/cloud
-..\..\bcspragu\Gobots\cloud\cloud.go:55: undefined: cloudlaunch in cloudlaunch.Config
-
-*/
