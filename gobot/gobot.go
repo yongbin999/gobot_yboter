@@ -39,3 +39,11 @@ exit status 1
 
 
 // collisons how often you update the board
+
+/*
+issures wuth pointer and changing position?
+func (pf *pathfinder) Act(b *game.Board, r *game.Robot) game.Action {
+  for _, d := range ds {
+    loc := r.Loc.Add(d)
+
+    */
