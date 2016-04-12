@@ -20,7 +20,7 @@ func (bt *yboter) Act(b *game.Board, r *game.Robot) game.Action {
 	}
 
 	//print stats
-	fmt.Printf("round:%3v bot %3v loc: %8v H:%v\n", b.Round, r.ID, r.Loc,r.Health)
+	fmt.Printf("round:%2v bot:%2v loc:%3v H:%v\n", b.Round, r.ID, r.Loc,r.Health)
 	
 	//update oppoent
 	update_opp(bt ,b , r)
@@ -313,7 +313,6 @@ func off_attack(b *game.Board, r *game.Robot) game.Action {
 
 func move_to_target(b *game.Board, r *game.Robot) game.Action {
 	opp := nearestOpponent(b, r)
-	curr_yloc = r.Loc
 		if opp == nil {
 			return game.Action{Kind: game.Wait}
 	}
@@ -339,7 +338,7 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 		}
 		loc = r.Loc
 		loc = loc.Add(game.North)
-		if (curr_yloc <=b.Center().Y && !friendAt(b, loc)){
+		if (r.Loc.Y <=b.Center().Y && !friendAt(b, loc)){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.North,
@@ -347,7 +346,7 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 		}
 		loc = r.Loc
 		loc = loc.Add(game.South)
-		if (curr_yloc >b.Center().Y && !friendAt(b, loc)){
+		if (r.Loc.Y >b.Center().Y && !friendAt(b, loc)){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.South,
@@ -366,7 +365,7 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 		}
 		loc = r.Loc
 		loc = loc.Add(game.North)
-		if (curr_yloc <=b.Center().Y && !friendAt(b, loc)){
+		if (r.Loc.Y <=b.Center().Y && !friendAt(b, loc)){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.North,
@@ -374,7 +373,7 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 		}
 		loc = r.Loc
 		loc = loc.Add(game.South)
-		if (curr_yloc >b.Center().Y && !friendAt(b, loc)){
+		if (r.Loc.Y >b.Center().Y && !friendAt(b, loc)){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.South,
