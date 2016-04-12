@@ -26,32 +26,33 @@ func (bt *yboter) Act(b *game.Board, r *game.Robot) game.Action {
 	//update oppoent
 	update_opp(bt ,b , r)
 
+	//defensive tatics
 	action := game.Action{Kind: game.Wait}
 	action = def_chain(bt,b,r)
 	if action.Kind != game.Wait{
-		fmt.Printf("action:%10v \n",action.Kind)
+		fmt.Printf("defend:%2v\n",action)
 		bt.prevHP[r.ID]  = r.Health
 		return action
 	}
 
-	//if nearby * avg dmage > your health destory
+	//offensive tatics
 	action = off_chain(b,r)
 	if action.Kind != game.Wait{
-		fmt.Printf("action:%10v \n",action.Kind)
+		fmt.Printf("attack:%2v\n",action)
 		bt.prevHP[r.ID]  = r.Health
 		return action
 	}
 
-	//move to target
+	//movement tatics
 	action = move_to_target(b, r)
 	if action.Kind != game.Wait{
-		fmt.Printf("action:%10v \n",action.Kind)
+		fmt.Printf("move:%2v\n",action)
 		bt.prevHP[r.ID]  = r.Health
 		return action
 	}
 
 	//save health to next one
-	fmt.Printf("action:%10v \n",action.Kind)
+	fmt.Printf("wait:%2v\n",action)
 	bt.prevHP[r.ID]  = r.Health
   	return game.Action{Kind: game.Wait}
 }
@@ -413,7 +414,7 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 		loc = r.Loc
 		loc = loc.Add(game.West)
 		if (!friendAt(b, loc) ){
-			if(count_friend_adj_loc(b, loc)<3){
+			if(direction_opp == direction_forward &&count_friend_adj_loc(b, loc)<3){
 				return game.Action{
 					Kind:      game.Move,
 					Direction: game.West,
@@ -461,7 +462,7 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 		loc = r.Loc
 		loc = loc.Add(game.East)
 		if (!friendAt(b, loc) ){
-			if(count_friend_adj_loc(b, loc)<3){
+			if(direction_opp == direction_forward && count_friend_adj_loc(b, loc)<3){
 				return game.Action{
 					Kind:      game.Move,
 					Direction: game.East,
