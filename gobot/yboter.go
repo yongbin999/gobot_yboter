@@ -8,6 +8,7 @@ type yboter struct{
 	aggression uint32
 	prevHP map[uint32]int
 	nextturn_enermy_HP map[uint32]int
+	robot_position map[uint32]game.Loc
 }
 
 func (bt *yboter) Act(b *game.Board, r *game.Robot) game.Action {
@@ -20,7 +21,7 @@ func (bt *yboter) Act(b *game.Board, r *game.Robot) game.Action {
 	}
 
 	//print stats
-	fmt.Printf("round:%2v bot:%2v loc:%3v H:%v\n", b.Round, r.ID, r.Loc,r.Health)
+	fmt.Printf("round:%2v bot:%2v loc:%3v H:%v", b.Round, r.ID, r.Loc,r.Health)
 	
 	//update oppoent
 	update_opp(bt ,b , r)
@@ -28,22 +29,29 @@ func (bt *yboter) Act(b *game.Board, r *game.Robot) game.Action {
 	action := game.Action{Kind: game.Wait}
 	action = def_chain(bt,b,r)
 	if action.Kind != game.Wait{
+		fmt.Printf("action:%10v \n",action.Kind)
+		bt.prevHP[r.ID]  = r.Health
 		return action
 	}
 
 	//if nearby * avg dmage > your health destory
 	action = off_chain(b,r)
 	if action.Kind != game.Wait{
+		fmt.Printf("action:%10v \n",action.Kind)
+		bt.prevHP[r.ID]  = r.Health
 		return action
 	}
 
 	//move to target
 	action = move_to_target(b, r)
 	if action.Kind != game.Wait{
+		fmt.Printf("action:%10v \n",action.Kind)
+		bt.prevHP[r.ID]  = r.Health
 		return action
 	}
 
 	//save health to next one
+	fmt.Printf("action:%10v \n",action.Kind)
 	bt.prevHP[r.ID]  = r.Health
   	return game.Action{Kind: game.Wait}
 }
@@ -189,6 +197,24 @@ func count_friend_adj(b *game.Board, r *game.Robot) int {
 	}
 	return counter
 }
+func count_friend_adj_loc(b *game.Board, loca game.Loc) int {
+	counter :=0
+	ds := []game.Direction{
+		game.North,
+		game.South,
+		game.East,
+		game.West,
+	}
+	for _, d := range ds {
+		loc := game.Loc{}
+		loc = loca
+		loc = loc.Add(d)
+		if friendAt(b, loc) {
+			counter +=1
+		}
+	}
+	return counter
+}
 
 func update_opp(bt *yboter,b *game.Board, r *game.Robot) {
 
@@ -301,6 +327,12 @@ func off_chain(b *game.Board, r *game.Robot) game.Action {
 	if action.Kind != game.Wait{
 		return action
 	}
+
+	action = off_preattack(b,r)
+	if action.Kind != game.Wait{
+		return action
+	}
+
   return game.Action{Kind: game.Wait}
 }
 
@@ -344,6 +376,24 @@ func off_attack(b *game.Board, r *game.Robot) game.Action {
   return game.Action{Kind: game.Wait}
 }
 
+func off_preattack(b *game.Board, r *game.Robot) game.Action {
+	opp := nearestOpponent(b, r)
+		if opp == nil {
+			return game.Action{Kind: game.Wait}
+	}
+
+	direction_opp := direction_enermy(opp,r)
+		//if enermy is marching toward you and attack
+	if game.Distance(r.Loc, opp.Loc) == 1 && count_friend_adj(b,opp) == 0{
+		return game.Action{
+				Kind:      game.Attack,
+				Direction: direction_opp,
+			}
+		}
+
+	return game.Action{Kind: game.Wait}
+}
+
 
 
 func move_to_target(b *game.Board, r *game.Robot) game.Action {
@@ -354,25 +404,40 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 
 	direction_opp := direction_enermy(opp,r)
 	direction_forward := direction_forward(b,r)
-	switch {
-		//if enermy is marching toward you and attack
-	case game.Distance(r.Loc, opp.Loc) == 1 && count_friend_adj(b,opp) == 0:
-		return game.Action{
-				Kind:      game.Attack,
-				Direction: direction_opp,
-			}
 
+	switch {
+		
 	// move forward when possible 
 	case direction_opp == game.West:
 		loc := game.Loc{}
 		loc = r.Loc
-		loc = loc.Add(direction_opp)
-		if (!friendAt(b, loc)){
-			return game.Action{
-				Kind:      game.Move,
-				Direction: game.West,
+		loc = loc.Add(game.West)
+		if (!friendAt(b, loc) ){
+			if(count_friend_adj_loc(b, loc)<3){
+				return game.Action{
+					Kind:      game.Move,
+					Direction: game.West,
+				}
+			}
+			//check if move sideways possible
+			loc = r.Loc
+			loc = loc.Add(game.North)
+			if (r.Loc.Y <=b.Center().Y && !friendAt(b, loc)){
+				return game.Action{
+					Kind:      game.Move,
+					Direction: game.North,
+				}
+			}
+			loc = r.Loc
+			loc = loc.Add(game.South)
+			if (r.Loc.Y >b.Center().Y && !friendAt(b, loc)){
+				return game.Action{
+					Kind:      game.Move,
+					Direction: game.South,
+				}
 			}
 		}
+
 		loc = r.Loc
 		loc = loc.Add(game.North)
 		if (r.Loc.Y <=b.Center().Y && !friendAt(b, loc)){
@@ -390,16 +455,37 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 			}
 		}
 
+
 	case direction_opp == game.East:
 		loc := game.Loc{}
 		loc = r.Loc
-		loc = loc.Add(direction_opp)
-		if (!friendAt(b, loc)){
-			return game.Action{
-				Kind:      game.Move,
-				Direction: game.East,
+		loc = loc.Add(game.East)
+		if (!friendAt(b, loc) ){
+			if(count_friend_adj_loc(b, loc)<3){
+				return game.Action{
+					Kind:      game.Move,
+					Direction: game.East,
+				}
+			}
+			//check if move sideways possible
+			loc = r.Loc
+			loc = loc.Add(game.North)
+			if (r.Loc.Y <=b.Center().Y && !friendAt(b, loc)){
+				return game.Action{
+					Kind:      game.Move,
+					Direction: game.North,
+				}
+			}
+			loc = r.Loc
+			loc = loc.Add(game.South)
+			if (r.Loc.Y >b.Center().Y && !friendAt(b, loc)){
+				return game.Action{
+					Kind:      game.Move,
+					Direction: game.South,
+				}
 			}
 		}
+
 		loc = r.Loc
 		loc = loc.Add(game.North)
 		if (r.Loc.Y <=b.Center().Y && !friendAt(b, loc)){
@@ -416,6 +502,7 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 				Direction: game.South,
 			}
 		}
+
 
 	case direction_opp == game.North:
 		loc := game.Loc{}
@@ -435,6 +522,7 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 				Direction: direction_forward,
 			}
 		}
+
 
 	case direction_opp == game.South:
 		loc := game.Loc{}

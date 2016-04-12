@@ -36,3 +36,6 @@ exit status 1
 //need to reinitaliza loc each loop
 //		loc = r.Loc
 //		loc = loc.Add(direction_opp)
+
+
+// collisons how often you update the board
