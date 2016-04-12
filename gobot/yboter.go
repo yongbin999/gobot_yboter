@@ -139,6 +139,38 @@ func count_enermies_adj(b *game.Board, r *game.Robot) int {
 	}
 	return counter
 }
+func count_friend_oct(b *game.Board, r *game.Robot) int {
+	counter :=0
+	ds := []game.Direction{
+		game.North,
+		game.South,
+		game.East,
+		game.West,
+	}
+	for _, d := range ds {
+
+		loc := game.Loc{}
+		loc = r.Loc
+		loc = loc.Add(d)
+		if friendAt(b, loc) {
+			counter +=1
+		}
+
+		if (d == game.North || d == game.South ){
+			loc = loc.Add(game.East)
+			//loc = r.Loc.Add(game.East)
+			if friendAt(b, loc) {
+				counter +=1
+			}
+			loc = loc.Add(game.West)
+			//loc = r.Loc.Add(game.West)
+			if friendAt(b, loc) {
+				counter +=1
+			}
+		}
+	}
+	return counter
+}
 func count_friend_adj(b *game.Board, r *game.Robot) int {
 	counter :=0
 	ds := []game.Direction{
@@ -273,10 +305,13 @@ func off_chain(b *game.Board, r *game.Robot) game.Action {
 }
 
 func off_selfdestruct(b *game.Board, r *game.Robot) game.Action {
+
+	//should  find death toll before do it, hp <15
 	nearby_count := count_enermies_oct(b,r)
+	friend_nearby_count := count_friend_oct(b,r)
 	//nearby_count_oct := count_enermies_otc(b,r)
 	//if nearby * avg dmage > your health destory
-	if (nearby_count*5 > r.Health ){
+	if (nearby_count>friend_nearby_count && nearby_count*5 > r.Health ){
 		return game.Action{
 	    	Kind: game.SelfDestruct,
 		}
@@ -316,7 +351,9 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 		if opp == nil {
 			return game.Action{Kind: game.Wait}
 	}
+
 	direction_opp := direction_enermy(opp,r)
+	direction_forward := direction_forward(b,r)
 	switch {
 		//if enermy is marching toward you and attack
 	case game.Distance(r.Loc, opp.Loc) == 1 && count_friend_adj(b,opp) == 0:
@@ -377,6 +414,44 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.South,
+			}
+		}
+
+	case direction_opp == game.North:
+		loc := game.Loc{}
+		loc = r.Loc
+		loc = loc.Add(direction_opp)
+		if (!friendAt(b, loc)){
+			return game.Action{
+				Kind:      game.Move,
+				Direction: game.North,
+			}
+		}
+		loc = r.Loc
+		loc = loc.Add(direction_forward)
+		if (!friendAt(b, loc)){
+			return game.Action{
+				Kind:      game.Move,
+				Direction: direction_forward,
+			}
+		}
+
+	case direction_opp == game.South:
+		loc := game.Loc{}
+		loc = r.Loc
+		loc = loc.Add(direction_opp)
+		if (!friendAt(b, loc)){
+			return game.Action{
+				Kind:      game.Move,
+				Direction: game.South,
+			}
+		}
+		loc = r.Loc
+		loc = loc.Add(direction_forward)
+		if (!friendAt(b, loc)){
+			return game.Action{
+				Kind:      game.Move,
+				Direction: direction_forward,
 			}
 		}
 	}
