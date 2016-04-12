@@ -29,3 +29,5 @@ Lost connection to server, trying to reconnect...
 Failed to connect to server: dial tcp: lookup gobotgame.com: getaddrinfow: No such host is known.
 exit status 1
 */
+
+//switch statements still require return?
