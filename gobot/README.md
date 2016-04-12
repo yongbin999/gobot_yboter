@@ -13,3 +13,7 @@ go run *.go
 
 
 
+## running daul bots to test
+go install ./pathfinder/
+go run ./pathfinder/*.go
+

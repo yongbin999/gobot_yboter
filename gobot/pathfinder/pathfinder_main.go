@@ -19,13 +19,5 @@ import "github.com/bcspragu/Gobots/game"
 
 
 func main() {
-    game.StartServerForFactory("yboter", "IlxVTAKDBsIisHXuGesBcBuds", game.ToFactory(&yboter{}))
+    game.StartServerForFactory("testing", "IlxVTAKDBsIisHXuGesBcBuds", game.ToFactory(&pathfinder{}))
 }
-
-
-//disconnect, still remain online on server
-/*
-Lost connection to server, trying to reconnect...
-Failed to connect to server: dial tcp: lookup gobotgame.com: getaddrinfow: No such host is known.
-exit status 1
-*/

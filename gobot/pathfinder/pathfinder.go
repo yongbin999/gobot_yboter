@@ -2,11 +2,11 @@ package main
 
 import "github.com/bcspragu/Gobots/game"
 
-type Pathfinder struct {
+type pathfinder struct {
   targets map[uint32]uint32
 }
 
-func (pf *Pathfinder) Act(b *game.Board, r *game.Robot) game.Action {
+func (pf *pathfinder) Act(b *game.Board, r *game.Robot) game.Action {
   // Immediate surrounding attacks
   ds := []game.Direction{
     game.North,
@@ -72,3 +72,35 @@ func (pf *Pathfinder) Act(b *game.Board, r *game.Robot) game.Action {
   // TODO: impossibru?
   return game.Action{Kind: game.Wait}
 }
+
+
+func nearestOpponent(b *game.Board, loc game.Loc) *game.Robot {
+  // Probably faster ways of doing this.. traversing outward
+  var closest *game.Robot
+  var closestDist int
+  for y, row := range b.Cells {
+    for x, r := range row {
+      curr := game.Loc{x, y}
+      if r == nil || r.Faction != game.OpponentFaction {
+        continue
+      }
+      d := game.Distance(loc, curr)
+      if closest == nil || d < closestDist {
+        closest, closestDist = r, d
+      }
+    }
+  }
+  return closest
+}
+
+func opponentAt(b *game.Board, loc game.Loc) bool {
+  if !b.IsInside(loc) {
+    return false
+  }
+  r := b.At(loc)
+  if r == nil {
+    return false
+  }
+  return r.Faction == game.OpponentFaction
+}
+
