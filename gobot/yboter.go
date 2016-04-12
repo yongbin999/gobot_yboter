@@ -20,7 +20,7 @@ func (bt *yboter) Act(b *game.Board, r *game.Robot) game.Action {
 	}
 
 	//print stats
-	fmt.Printf("round:%v bot %v location: %v\tH:%v  \n", b.Round, r.ID, r.Loc,r.Health)
+	fmt.Printf("round:%3v bot %3v loc: %8v H:%v\n", b.Round, r.ID, r.Loc,r.Health)
 	
 	//update oppoent
 	update_opp(bt ,b , r)
@@ -313,11 +313,11 @@ func off_attack(b *game.Board, r *game.Robot) game.Action {
 
 func move_to_target(b *game.Board, r *game.Robot) game.Action {
 	opp := nearestOpponent(b, r)
+	curr_yloc = r.Loc
 		if opp == nil {
 			return game.Action{Kind: game.Wait}
 	}
 	direction_opp := direction_enermy(opp,r)
-	curr_yloc:= r.Loc.Y
 	switch {
 		//if enermy is marching toward you and attack
 	case game.Distance(r.Loc, opp.Loc) == 1 && count_friend_adj(b,opp) == 0:
@@ -328,19 +328,26 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 
 	// move forward when possible 
 	case direction_opp == game.West:
-		if (!friendAt(b, r.Loc.Add(direction_opp))){
+		loc := game.Loc{}
+		loc = r.Loc
+		loc = loc.Add(direction_opp)
+		if (!friendAt(b, loc)){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.West,
 			}
 		}
-		if (curr_yloc <=b.Center().Y && !friendAt(b, r.Loc.Add(game.North))){
+		loc = r.Loc
+		loc = loc.Add(game.North)
+		if (curr_yloc <=b.Center().Y && !friendAt(b, loc)){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.North,
 			}
 		}
-		if (curr_yloc >b.Center().Y && !friendAt(b, r.Loc.Add(game.South))){
+		loc = r.Loc
+		loc = loc.Add(game.South)
+		if (curr_yloc >b.Center().Y && !friendAt(b, loc)){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.South,
@@ -348,19 +355,26 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 		}
 
 	case direction_opp == game.East:
-		if (!friendAt(b, r.Loc.Add(direction_opp))){
+		loc := game.Loc{}
+		loc = r.Loc
+		loc = loc.Add(direction_opp)
+		if (!friendAt(b, loc)){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.East,
 			}
 		}
-		if (curr_yloc <=b.Center().Y &&!friendAt(b, r.Loc.Add(game.North))){
+		loc = r.Loc
+		loc = loc.Add(game.North)
+		if (curr_yloc <=b.Center().Y && !friendAt(b, loc)){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.North,
 			}
 		}
-		if (curr_yloc >b.Center().Y && !friendAt(b, r.Loc.Add(game.South))){
+		loc = r.Loc
+		loc = loc.Add(game.South)
+		if (curr_yloc >b.Center().Y && !friendAt(b, loc)){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.South,

@@ -31,3 +31,8 @@ exit status 1
 */
 
 //switch statements still require return?
+
+
+//need to reinitaliza loc each loop
+//		loc = r.Loc
+//		loc = loc.Add(direction_opp)
