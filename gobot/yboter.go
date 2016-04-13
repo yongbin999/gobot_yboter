@@ -52,16 +52,16 @@ func (bt *yboter) Act(b *game.Board, r *game.Robot) game.Action {
 	}
 
 	//offensive tatics
-	action = off_chain(b,r)
+	action = off_chain(bt, b,r)
 	if action.Kind != game.Wait{
 		print_action(&action)
-		update_future_health(bt, r, &action) 
+		update_future_health(bt, b, r, &action) 
 		bt.self_prevHP[r.ID]  = r.Health
 		return action
 	}
 
 	//movement tatics
-	action = move_to_target(b, r)
+	action = move_to_target(bt, b, r)
 	if action.Kind != game.Wait{
 		print_action(&action)
 		update_future_position(bt, r, &action) 
@@ -379,12 +379,26 @@ func update_future_position(bt *yboter, r *game.Robot, action *game.Action) {
 	bt.robot_positions[loc] = bt.robot_positions[r.Loc]
 	bt.robot_positions[r.Loc] = pos_stats{}
 }
-func update_future_health(bt *yboter, r *game.Robot, action *game.Action) {
-	loc := game.Loc{}
-	loc = r.Loc
-	loc = loc.Add(action.Direction)
-	bt.robot_positions[loc] = bt.robot_positions[r.Loc]
-	bt.robot_positions[r.Loc] = pos_stats{}
+func update_future_health(bt *yboter, b *game.Board ,r *game.Robot, action *game.Action) {
+	switch{
+		case action.Kind ==game.Attack: {	
+			loc := game.Loc{}
+			loc = r.Loc
+			loc = loc.Add(action.Direction)
+			currentstats := bt.robot_positions[loc]
+			currentstats.future_health += -10
+			bt.robot_positions[loc] = currentstats
+		}	
+		case action.Kind ==game.SelfDestruct: {
+			locations := b.LocsAround(r.Loc)
+			for _, loc := range locations{
+				currentstats := bt.robot_positions[loc]
+				currentstats.future_health += -15
+				bt.robot_positions[loc] = currentstats
+			}
+		}
+	}
+
 }
 
 
@@ -394,7 +408,7 @@ func update_future_health(bt *yboter, r *game.Robot, action *game.Action) {
 
 func def_chain(bt *yboter,b *game.Board, r *game.Robot) game.Action {
 	action :=  game.Action{Kind: game.Wait}
-	action = def_lure(b,r)
+	action = def_lure(bt, b,r)
 	if action.Kind != game.Wait{
 		return action
 	}
@@ -418,30 +432,39 @@ func def_guard(bt *yboter,b *game.Board, r *game.Robot) game.Action {
   return game.Action{Kind: game.Wait}
 }
 
-func def_lure(b *game.Board, r *game.Robot) game.Action {
+func def_lure(bt *yboter,b *game.Board, r *game.Robot) game.Action {
 	//move back to lure enermy
-	if(r.Health>25){
 	nearby_count := count_enermies_oct(b,r)
 	nearby_friend_count := count_friend_oct(b,r)
-	direction :=  direction_back(b , r )
+	direction_backward :=  direction_back(b , r )
+	direction_forward :=  direction_forward(b , r )
+
+	enermyloc := game.Loc{}
+	enermyloc = r.Loc
+	enermyloc = enermyloc.Add(direction_forward)
+	opp_bot := b.At(enermyloc)
+
 	loc := game.Loc{}
 	loc = r.Loc
-	loc = loc.Add(direction)
+	loc = loc.Add(direction_backward)
 	loc_type := b.LocType(loc)
+
 	if (nearby_count >=2 &&nearby_friend_count<=2  && loc_type== game.Valid){
 		bot_atloc := b.At(loc)
-		if (bot_atloc == nil && !friendAt(b,loc)){
-				return game.Action{
-						Kind:      game.Move,
-						Direction: direction,
-				}
+		if (opp_bot != nil){
+			futurehealth := bt.robot_positions[opp_bot.Loc].future_health
+			if (futurehealth>10 && bot_atloc == nil && !friendAt(b,loc)){
+					return game.Action{
+							Kind:      game.Move,
+							Direction: direction_forward,
+					}
 			}
 		}
 	}
   return game.Action{Kind: game.Wait}
 }
 
-func off_chain(b *game.Board, r *game.Robot) game.Action {
+func off_chain(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 	action := game.Action{Kind: game.Wait}
 	action = off_selfdestruct(b,r)
 	if action.Kind != game.Wait{
@@ -450,7 +473,7 @@ func off_chain(b *game.Board, r *game.Robot) game.Action {
 	//lure when right condition
 	
 	//apply attack
-	action = off_attack(b,r)
+	action = off_attack(bt, b,r)
 	if action.Kind != game.Wait{
 		return action
 	}
@@ -479,7 +502,7 @@ func off_selfdestruct(b *game.Board, r *game.Robot) game.Action {
   return game.Action{Kind: game.Wait}
 }
 
-func off_attack(b *game.Board, r *game.Robot) game.Action {
+func off_attack(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 	ds := []game.Direction{
 		game.North,
 		game.East,
@@ -494,9 +517,13 @@ func off_attack(b *game.Board, r *game.Robot) game.Action {
 		loc = r.Loc
 		loc = loc.Add(d)
 		if opponentAt(b, loc) {
-			return game.Action{
-				Kind:      game.Attack,
-				Direction: d,
+			opp_bot := b.At(loc)
+			futurehealth := bt.robot_positions[opp_bot.Loc].future_health
+			if futurehealth >0{
+				return game.Action{
+					Kind:      game.Attack,
+					Direction: d,
+				}
 			}
 		}
 	}
@@ -523,7 +550,7 @@ func off_preattack(b *game.Board, r *game.Robot) game.Action {
 
 
 
-func move_to_target(b *game.Board, r *game.Robot) game.Action {
+func move_to_target(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 	opp := nearestOpponent(b, r)
 		if opp == nil {
 			return game.Action{Kind: game.Wait}
@@ -531,43 +558,42 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 
 	direction_opp := direction_enermy(opp,r)
 	direction_forward := direction_forward(b,r)
+	loc :=game.Loc{}
+	fut_loc := game.Loc{}
+	fut_loc = r.Loc
+	fut_loc = fut_loc.Add(direction_opp)
+	fut_pos := bt.robot_positions[fut_loc]
+	final_action :=game.Action{Kind: game.Wait}
 
 	switch {
 		
-	// move forward when possible 
+	// move forward when possible
 	case direction_opp == game.West:
-		loc := game.Loc{}
-		loc = r.Loc
-		loc = loc.Add(game.West)
-		if (!friendAt(b, loc) ){
+		if (fut_pos !=pos_stats{}){
+			loc = r.Loc
+			loc = loc.Add(game.West)
 			if(count_friend_adj_loc(b, loc)<3){
-				return game.Action{
-					Kind:      game.Move,
-					Direction: game.West,
-				}
+				final_action.Direction = game.West
 			}
 			//check if move sideways possible
 			loc = r.Loc
 			loc = loc.Add(game.North)
-			if (r.Loc.Y <=b.Center().Y && !friendAt(b, loc)){
-				return game.Action{
-					Kind:      game.Move,
-					Direction: game.North,
-				}
+			fut_pos = bt.robot_positions[loc]
+			if (r.Loc.Y <=b.Center().Y && fut_pos !=pos_stats{}){
+				final_action.Direction = game.North
 			}
 			loc = r.Loc
 			loc = loc.Add(game.South)
-			if (r.Loc.Y >b.Center().Y && !friendAt(b, loc)){
-				return game.Action{
-					Kind:      game.Move,
-					Direction: game.South,
-				}
+			fut_pos = bt.robot_positions[loc]
+			if (r.Loc.Y >b.Center().Y && fut_pos !=pos_stats{}){
+				final_action.Direction = game.South
 			}
 		}
 
 		loc = r.Loc
 		loc = loc.Add(game.North)
-		if (r.Loc.Y <=b.Center().Y && !friendAt(b, loc)){
+		fut_pos = bt.robot_positions[loc]
+		if (r.Loc.Y <=b.Center().Y && fut_pos !=pos_stats{}){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.North,
@@ -575,7 +601,8 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 		}
 		loc = r.Loc
 		loc = loc.Add(game.South)
-		if (r.Loc.Y >b.Center().Y && !friendAt(b, loc)){
+		fut_pos = bt.robot_positions[loc]
+		if (r.Loc.Y >b.Center().Y && fut_pos !=pos_stats{}){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.South,
@@ -584,10 +611,9 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 
 
 	case direction_opp == game.East:
-		loc := game.Loc{}
-		loc = r.Loc
-		loc = loc.Add(game.East)
-		if (!friendAt(b, loc) ){
+		if (fut_pos !=pos_stats{}){
+			loc = r.Loc
+			loc = loc.Add(game.West)
 			if(count_friend_adj_loc(b, loc)<3){
 				return game.Action{
 					Kind:      game.Move,
@@ -597,7 +623,8 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 			//check if move sideways possible
 			loc = r.Loc
 			loc = loc.Add(game.North)
-			if (r.Loc.Y <=b.Center().Y && !friendAt(b, loc)){
+			fut_pos = bt.robot_positions[loc]
+			if (r.Loc.Y <=b.Center().Y && fut_pos !=pos_stats{}){
 				return game.Action{
 					Kind:      game.Move,
 					Direction: game.North,
@@ -605,7 +632,8 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 			}
 			loc = r.Loc
 			loc = loc.Add(game.South)
-			if (r.Loc.Y >b.Center().Y && !friendAt(b, loc)){
+			fut_pos = bt.robot_positions[loc]
+			if (r.Loc.Y >b.Center().Y && fut_pos !=pos_stats{}){
 				return game.Action{
 					Kind:      game.Move,
 					Direction: game.South,
@@ -615,7 +643,8 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 
 		loc = r.Loc
 		loc = loc.Add(game.North)
-		if (r.Loc.Y <=b.Center().Y && !friendAt(b, loc)){
+		fut_pos = bt.robot_positions[loc]
+		if (r.Loc.Y <=b.Center().Y &&  fut_pos !=pos_stats{}){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.North,
@@ -623,7 +652,8 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 		}
 		loc = r.Loc
 		loc = loc.Add(game.South)
-		if (r.Loc.Y >b.Center().Y && !friendAt(b, loc)){
+		fut_pos = bt.robot_positions[loc]
+		if (r.Loc.Y >b.Center().Y &&  fut_pos !=pos_stats{}){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.South,
@@ -635,7 +665,8 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 		loc := game.Loc{}
 		loc = r.Loc
 		loc = loc.Add(direction_opp)
-		if (!friendAt(b, loc)){
+		fut_pos = bt.robot_positions[loc]
+		if (fut_pos !=pos_stats{}){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.North,
@@ -643,7 +674,8 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 		}
 		loc = r.Loc
 		loc = loc.Add(direction_forward)
-		if (!friendAt(b, loc)){
+		fut_pos = bt.robot_positions[loc]
+		if (fut_pos !=pos_stats{}){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: direction_forward,
@@ -655,7 +687,8 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 		loc := game.Loc{}
 		loc = r.Loc
 		loc = loc.Add(direction_opp)
-		if (!friendAt(b, loc)){
+		fut_pos = bt.robot_positions[loc]
+		if (fut_pos != pos_stats{} ){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.South,
@@ -663,7 +696,8 @@ func move_to_target(b *game.Board, r *game.Robot) game.Action {
 		}
 		loc = r.Loc
 		loc = loc.Add(direction_forward)
-		if (!friendAt(b, loc)){
+		fut_pos = bt.robot_positions[loc]
+		if (fut_pos !=pos_stats{} ){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: direction_forward,
