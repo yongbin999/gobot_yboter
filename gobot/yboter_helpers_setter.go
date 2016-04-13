@@ -1,7 +1,7 @@
 package main
 
 import "github.com/bcspragu/Gobots/game"
-//import "fmt"
+import "fmt"
 
 //---------------------------------------------------------------------------
 //helpers:
@@ -15,14 +15,13 @@ func init_yboter_states(bt *yboter,b *game.Board,r *game.Robot) {
 	}
 	switch {
 		case ( bt.robot_positions == nil):
-				bt.robot_positions = make(map[game.Loc]pos_stats)
-				bt.robot_positions = init_futureboard(b)
+				init_futureboard(bt, b)
 				//fmt.Printf("stats : %v\n", bt.robot_positions)
 				bt.current_turn = b.Round
 		case ( bt.current_turn != b.Round):
 				//copy everything from board to here
-				bt.robot_positions = make(map[game.Loc]pos_stats)
-				bt.robot_positions =init_futureboard(b)
+				init_futureboard(bt, b)
+				fmt.Printf("botsmap:%v \n",bt.robot_positions)
 				bt.current_turn = b.Round
 	}
 }
@@ -39,8 +38,8 @@ func update_targets(bt *yboter,b *game.Board, r *game.Robot) {
 	}
 }
 
-func init_futureboard(b *game.Board) map[game.Loc]pos_stats{
-	cells := make(map[game.Loc]pos_stats)
+func init_futureboard(bt *yboter,b *game.Board) {
+	bt.robot_positions = make(map[game.Loc]pos_stats)
 	friendbots :=b.Bots(game.MyFaction)
 	enermybots :=b.Bots(game.OpponentFaction)
 
@@ -48,15 +47,14 @@ func init_futureboard(b *game.Board) map[game.Loc]pos_stats{
 		posstats := pos_stats{}
 		posstats.future_whats_here = "friend"
 		posstats.future_health = bot.Health
-		cells[bot.Loc] = posstats
+		bt.robot_positions[bot.Loc] = posstats
 	}
 	for _, bot := range enermybots{
 		posstats := pos_stats{}
 		posstats.future_whats_here = "enermy"
 		posstats.future_health = bot.Health
-		cells[bot.Loc] = posstats
+		bt.robot_positions[bot.Loc] = posstats
 	}
-	return cells
 }
 func update_future_position(bt *yboter, r *game.Robot, action *game.Action) {
 	loc := game.Loc{}

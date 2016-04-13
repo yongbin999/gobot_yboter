@@ -19,5 +19,5 @@ import "github.com/bcspragu/Gobots/game"
 
 
 func main() {
-    game.StartServerForFactory("testing", "IlxVTAKDBsIisHXuGesBcBuds", game.ToFactory(&pathfinder{}))
+    game.StartServerForFactory("pathfinder", "IlxVTAKDBsIisHXuGesBcBuds", game.ToFactory(&pathfinder{}))
 }

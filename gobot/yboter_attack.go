@@ -60,11 +60,12 @@ func off_attack(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 		loc := game.Loc{}
 		loc = r.Loc
 		loc = loc.Add(d)
+
 		if opponentAt(b, loc) {
 			opp_bot := b.At(loc)
 			pos_bot := bt.robot_positions[opp_bot.Loc]
 
-			fmt.Printf("\n\t enermy loc:%v stats:%v, act.HP%v \n",loc, pos_bot,opp_bot.Health)
+			fmt.Printf("\n\t targerloc: %v enermy loc:%v stats:%v, act.HP%v \n",loc,opp_bot.Loc, pos_bot,opp_bot.Health)
 
 			if pos_bot.future_health >0{
 				return game.Action{

@@ -48,3 +48,7 @@ func (pf *pathfinder) Act(b *game.Board, r *game.Robot) game.Action {
     loc := r.Loc.Add(d)
 
     */
+
+
+
+   // on website click match, but client already disconnected. bot remains online. 

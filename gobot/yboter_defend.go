@@ -40,27 +40,24 @@ func def_lure(bt *yboter,b *game.Board, r *game.Robot) game.Action {
 	enermyloc := game.Loc{}
 	enermyloc = r.Loc
 	enermyloc = enermyloc.Add(direction_forward)
-	opp_bot := b.At(enermyloc)
+	loc_type := b.LocType(enermyloc)
+	if (loc_type ==game.Valid){
+		opp_bot := b.At(enermyloc)
 
-	loc := game.Loc{}
-	loc = r.Loc
-	loc = loc.Add(direction_backward)
-	loc_type := b.LocType(loc)
-
-	if (nearby_count >=2 &&nearby_friend_count<=2  && loc_type== game.Valid){
-		bot_atloc := b.At(loc)
-		if (opp_bot != nil){
-			futurehealth := bt.robot_positions[opp_bot.Loc].future_health
-			if (futurehealth>10 && bot_atloc == nil && !friendAt(b,loc)){
-					return game.Action{
-							Kind:      game.Move,
-							Direction: direction_backward,
-					}
+		loc := game.Loc{}
+		loc = r.Loc
+		loc = loc.Add(direction_backward)
+		loc_type := b.LocType(loc)
+		if (opp_bot !=nil){
+			if (nearby_count >2 &&nearby_friend_count<=2  && loc_type== game.Valid){
+					futurehealth := bt.robot_positions[opp_bot.Loc].future_health
+					if (futurehealth>10 && !friendAt(b,loc)){
+						return game.Action{
+								Kind:      game.Move,
+								Direction: direction_backward,
+						}
+				}
 			}
-			return game.Action{
-							Kind:      game.Attack,
-							Direction: direction_forward,
-					}
 		}
 	}
   return game.Action{Kind: game.Wait}

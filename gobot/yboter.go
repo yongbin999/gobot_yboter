@@ -30,6 +30,7 @@ func (bt *yboter) Act(b *game.Board, r *game.Robot) game.Action {
 
 func ai_action(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 	//print current stats into console
+
 	fmt.Printf("round:%2v bot:%2v loc:%3v H:%2v ", b.Round, r.ID, r.Loc,r.Health)
 	action := game.Action{Kind: game.Wait}
 
