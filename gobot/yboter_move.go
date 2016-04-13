@@ -1,7 +1,7 @@
 package main
 
 import "github.com/bcspragu/Gobots/game"
-import "fmt"
+//import "fmt"
 
 //start movement tatics chain
 func move_chain(bt *yboter,b *game.Board, r *game.Robot) game.Action {
@@ -36,41 +36,36 @@ func move_to_target(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 		if (action.Kind !=game.Wait){
 			loc = r.Loc
 			loc = loc.Add(direction_opp)
-			if(count_friend_adj_loc(b, loc)<3 || game.Distance(r.Loc, loc)>2){ // 
+			if(count_friend_adj_loc(b, loc)<3 ){ // 
 				return action
 			}
 		}
-		return move_fanout(bt,b,r)
 
 	case direction_opp == game.South:
 		action = move_to_direction(bt,b,r,direction_opp)
 		if (action.Kind !=game.Wait){
 			return action
 		}
-		return move_forward(bt,b,r)
 
 	case direction_opp == game.East:
 		action = move_to_direction(bt,b,r,direction_opp)
 		if (action.Kind !=game.Wait){
 			loc = r.Loc
 			loc = loc.Add(direction_opp)
-			if(count_friend_adj_loc(b, loc)<3 || game.Distance(r.Loc, loc)>2 ){ // || game.Distance(r.Loc, loc)>2
+			if(count_friend_adj_loc(b, loc)<3 ){ // || game.Distance(r.Loc, loc)>2
 				return action
 			}
 		}
-		return move_fanout(bt,b,r)
 
 	case direction_opp == game.North:
 		action = move_to_direction(bt,b,r,direction_opp)
 		if (action.Kind !=game.Wait){
 			return action
 		}
-		return move_forward(bt,b,r)
 	}
 	
 	// move sideways if falls out from the case conditions
-
-	return move_forward(bt,b,r)
+	return move_fanout(bt,b,r)
 }
 
 //fan out to the north and south when its too crowded
@@ -80,7 +75,7 @@ func move_fanout_lure(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 				return game.Action{Kind: game.Wait}
 		}
 		//if enermy is marching toward you and attack
-		if game.Distance(r.Loc, opp.Loc) == 2 && count_friend_adj(b,opp) == 0{
+		if game.Distance(r.Loc, opp.Loc) == 2 && count_friend_adj(b,opp) == 0 {
 			if ( count_friend_oct(b,r)==1 || count_friend_oct(b,r)>3){
 				return move_fanout(bt,b,r)
 			}
@@ -97,7 +92,7 @@ func move_fanout(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 		loc = loc.Add(game.North)
 		fut_pos = bt.robot_positions[loc]
 
-		if (r.Loc.Y <b.Center().Y &&  fut_pos ==pos_stats{}){
+		if (r.Loc.Y <b.Center().Y &&  fut_pos ==pos_stats{} && b.LocType(loc)==game.Valid){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.North,
@@ -107,7 +102,7 @@ func move_fanout(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 		loc = loc.Add(game.South)
 		fut_pos = bt.robot_positions[loc]
 
-		if (r.Loc.Y >=b.Center().Y &&  fut_pos ==pos_stats{}){
+		if (r.Loc.Y >b.Center().Y &&  fut_pos ==pos_stats{} && b.LocType(loc)==game.Valid){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.South,
@@ -125,7 +120,7 @@ func move_forward(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 		loc = r.Loc
 		loc = loc.Add(direction_forward)
 		fut_pos = bt.robot_positions[loc]
-		if (fut_pos ==pos_stats{} ){
+		if (fut_pos ==pos_stats{} && b.LocType(loc)==game.Valid){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: direction_forward,
@@ -140,9 +135,9 @@ func move_to_direction(bt *yboter, b *game.Board, r *game.Robot, dir game.Direct
 		loc = r.Loc
 		loc = loc.Add(dir)
 		fut_pos = bt.robot_positions[loc]
-		fmt.Printf("stats : %v, clear: %v", fut_pos,fut_pos ==pos_stats{})
-		
-		if (fut_pos ==pos_stats{} ){
+		//fmt.Printf("stats:%v, clear:%v ", fut_pos,fut_pos ==pos_stats{})
+
+		if (fut_pos ==pos_stats{} && b.LocType(loc)==game.Valid){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: dir,

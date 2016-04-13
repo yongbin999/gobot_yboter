@@ -1,7 +1,7 @@
 package main
 
 import "github.com/bcspragu/Gobots/game"
-import "fmt"
+//import "fmt"
 
 //---------------------------------------------------------------------------
 //helpers:
@@ -17,10 +17,11 @@ func init_yboter_states(bt *yboter,b *game.Board,r *game.Robot) {
 		case ( bt.robot_positions == nil):
 				bt.robot_positions = make(map[game.Loc]pos_stats)
 				bt.robot_positions = init_futureboard(b)
-				fmt.Printf("stats : %v\n", bt.robot_positions)
+				//fmt.Printf("stats : %v\n", bt.robot_positions)
 				bt.current_turn = b.Round
 		case ( bt.current_turn != b.Round):
 				//copy everything from board to here
+				bt.robot_positions = make(map[game.Loc]pos_stats)
 				bt.robot_positions =init_futureboard(b)
 				bt.current_turn = b.Round
 	}

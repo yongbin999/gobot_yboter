@@ -1,6 +1,8 @@
 package main
 
 import "github.com/bcspragu/Gobots/game"
+import "fmt"
+
 
 //run through all the offensive tatics
 func off_chain(bt *yboter, b *game.Board, r *game.Robot) game.Action {
@@ -60,8 +62,11 @@ func off_attack(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 		loc = loc.Add(d)
 		if opponentAt(b, loc) {
 			opp_bot := b.At(loc)
-			futurehealth := bt.robot_positions[opp_bot.Loc].future_health
-			if futurehealth >0{
+			pos_bot := bt.robot_positions[opp_bot.Loc]
+
+			fmt.Printf("\n\t enermy loc:%v stats:%v, act.HP%v \n",loc, pos_bot,opp_bot.Health)
+
+			if pos_bot.future_health >0{
 				return game.Action{
 					Kind:      game.Attack,
 					Direction: d,
@@ -80,8 +85,11 @@ func off_preattack(b *game.Board, r *game.Robot) game.Action {
 	}
 
 	direction_opp := direction_enermy(opp,r)
+
 		//if enermy is marching toward you and attack
 	if game.Distance(r.Loc, opp.Loc) == 1 && count_friend_adj(b,opp) == 0{
+
+		//fmt.Printf("opp :%v, ", opp)
 		return game.Action{
 				Kind:      game.Attack,
 				Direction: direction_opp,
