@@ -19,6 +19,7 @@ type pos_stats struct{
 func (bt *yboter) Act(b *game.Board, r *game.Robot) game.Action {
 	//init variables
 	init_yboter_states(bt,b,r)
+	
 	//update oppoent
 	update_targets(bt ,b , r)
 	
