@@ -2,7 +2,7 @@ package main
 
 import "github.com/bcspragu/Gobots/game"
 
-
+// start chain def tatics
 func def_chain(bt *yboter,b *game.Board, r *game.Robot) game.Action {
 	action :=  game.Action{Kind: game.Wait}
 	action = def_lure(bt, b,r)
@@ -17,9 +17,9 @@ func def_chain(bt *yboter,b *game.Board, r *game.Robot) game.Action {
   return game.Action{Kind: game.Wait}
 }
 
+//guard when under 2+ attacks, check against prev health in stateboard
 func def_guard(bt *yboter,b *game.Board, r *game.Robot) game.Action {
 	nearby_count := count_enermies_adj(b,r)
-	//save the last health
 	switch {
 		case (bt.self_prevHP[r.ID] - r.Health > 15):
 			if r.Health >= nearby_count*10 {
@@ -29,6 +29,7 @@ func def_guard(bt *yboter,b *game.Board, r *game.Robot) game.Action {
   return game.Action{Kind: game.Wait}
 }
 
+// flight or fight when overwhelmed by enermy
 func def_lure(bt *yboter,b *game.Board, r *game.Robot) game.Action {
 	//move back to lure enermy
 	nearby_count := count_enermies_oct(b,r)
@@ -53,9 +54,13 @@ func def_lure(bt *yboter,b *game.Board, r *game.Robot) game.Action {
 			if (futurehealth>10 && bot_atloc == nil && !friendAt(b,loc)){
 					return game.Action{
 							Kind:      game.Move,
-							Direction: direction_forward,
+							Direction: direction_backward,
 					}
 			}
+			return game.Action{
+							Kind:      game.Attack,
+							Direction: direction_forward,
+					}
 		}
 	}
   return game.Action{Kind: game.Wait}

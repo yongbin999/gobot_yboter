@@ -2,21 +2,23 @@ package main
 
 import "github.com/bcspragu/Gobots/game"
 
-
+//run through all the offensive tatics
 func off_chain(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 	action := game.Action{Kind: game.Wait}
+
+	//consider self destruct when kills more than self
 	action = off_selfdestruct(b,r)
 	if action.Kind != game.Wait{
 		return action
 	}
-	//lure when right condition
 	
-	//apply attack
+	//apply attack surrounding
 	action = off_attack(bt, b,r)
 	if action.Kind != game.Wait{
 		return action
 	}
 
+	//lure when right condition, attack anticipated landing spot
 	action = off_preattack(b,r)
 	if action.Kind != game.Wait{
 		return action
@@ -41,6 +43,9 @@ func off_selfdestruct(b *game.Board, r *game.Robot) game.Action {
   return game.Action{Kind: game.Wait}
 }
 
+
+//attack the lowest instead of follow direction (not implemented yet)
+//collective attack not exceed their base
 func off_attack(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 	ds := []game.Direction{
 		game.North,
@@ -48,9 +53,7 @@ func off_attack(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 		game.South,
 		game.West,
 	}
-	//collective attack not exceed their base not implemented yet
 
-	//attack the lowest instead of follow direction
 	for _, d := range ds {
 		loc := game.Loc{}
 		loc = r.Loc
@@ -69,6 +72,7 @@ func off_attack(bt *yboter, b *game.Board, r *game.Robot) game.Action {
   return game.Action{Kind: game.Wait}
 }
 
+//lure when right condition, attack anticipated landing spot
 func off_preattack(b *game.Board, r *game.Robot) game.Action {
 	opp := nearestOpponent(b, r)
 		if opp == nil {
