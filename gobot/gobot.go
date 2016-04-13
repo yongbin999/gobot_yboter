@@ -4,6 +4,7 @@ import "github.com/bcspragu/Gobots/game"
 
 //import "github.com/yongbin999/gobot/yboter"
 
+//some ideas
 //if distance with closes enermy == 1 and 0 or have adjcent friend neighbor, attack
 //if distance with closes enermy == 1 and 0 or fork adjcent friend neighbor, march
 

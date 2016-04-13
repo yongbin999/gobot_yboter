@@ -17,3 +17,10 @@ go run *.go
 go install ./pathfinder/
 go run ./pathfinder/*.go
 
+
+## about this bot
+all the main functions are split into files
+* current turn state board
+* defense module
+* attack module
+* movement module 
