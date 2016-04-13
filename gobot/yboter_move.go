@@ -28,6 +28,7 @@ func move_to_target(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 	loc :=game.Loc{}
 	action := game.Action{}
 
+	//order matters, going counter clockwise
 	switch {	
 	case direction_opp == game.West:
 		action = move_to_direction(bt,b,r,direction_opp)
@@ -36,16 +37,12 @@ func move_to_target(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 				return action
 			}
 		}
-		//check if move sideways possible
-		return move_fanout(bt,b,r)
 
 	case direction_opp == game.South:
 		action = move_to_direction(bt,b,r,direction_opp)
 		if (action.Kind !=game.Wait){
 			return action
 		}
-		//if sideway not possible try forward
-		return move_forward(bt,b,r)
 
 	case direction_opp == game.East:
 		action = move_to_direction(bt,b,r,direction_opp)
@@ -54,22 +51,16 @@ func move_to_target(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 				return action
 			}
 		}
-		//check if move sideways possible
-		return move_fanout(bt,b,r)
-
 
 	case direction_opp == game.North:
 		action = move_to_direction(bt,b,r,direction_opp)
 		if (action.Kind !=game.Wait){
 			return action
 		}
-		//if sideway not possible try forward
-		return move_forward(bt,b,r)
-
-
 	}
-
-  return game.Action{Kind: game.Wait}
+	
+	// move sideways if falls out from the case conditions
+	return move_fanout(bt,b,r)
 }
 
 //fan out to the north and south when its too crowded
@@ -95,7 +86,7 @@ func move_fanout(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 		loc = r.Loc
 		loc = loc.Add(game.North)
 		fut_pos = bt.robot_positions[loc]
-		if (r.Loc.Y <=b.Center().Y &&  fut_pos !=pos_stats{}){
+		if (r.Loc.Y <b.Center().Y &&  fut_pos !=pos_stats{}){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.North,
@@ -104,7 +95,7 @@ func move_fanout(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 		loc = r.Loc
 		loc = loc.Add(game.South)
 		fut_pos = bt.robot_positions[loc]
-		if (r.Loc.Y >b.Center().Y &&  fut_pos !=pos_stats{}){
+		if (r.Loc.Y >=b.Center().Y &&  fut_pos !=pos_stats{}){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.South,
