@@ -39,16 +39,24 @@ exit status 1
 //		loc = loc.Add(direction_opp)
 
 
-// collisons how often you update the board
+   // on website click match, but client already disconnected. bot remains online.
 
-/*
-issures wuth pointer and changing position?
-func (pf *pathfinder) Act(b *game.Board, r *game.Robot) game.Action {
-  for _, d := range ds {
-    loc := r.Loc.Add(d)
-
-    */
+//distance between 2 bot,  x=10, x=8  dist = 2? or 1
 
 
+//cant attack for p2 not wired?
+//https://github.com/bcspragu/Gobots/blob/master/match.go#L185
 
-   // on website click match, but client already disconnected. bot remains online. 
+
+//bots dissapear after a few rounds
+
+
+///https://github.com/bcspragu/Gobots/blob/master/engine/replayer.go
+
+
+
+
+
+
+
+

@@ -15,7 +15,7 @@ func move_chain(bt *yboter,b *game.Board, r *game.Robot) game.Action {
 		return action
 	}
 
-  return game.Action{Kind: game.Wait}
+  return move_forward(bt,b,r)
 }
 
 //switch case on 4 direction when moving towards closest enermy
@@ -75,7 +75,7 @@ func move_fanout_lure(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 				return game.Action{Kind: game.Wait}
 		}
 		//if enermy is marching toward you and attack
-		if game.Distance(r.Loc, opp.Loc) == 2 && count_friend_adj(b,opp) == 0 {
+		if game.Distance(r.Loc, opp.Loc) == 3 && count_friend_adj(b,opp) == 0 {
 			if ( count_friend_oct(b,r)==1 || count_friend_oct(b,r)>3){
 				return move_fanout(bt,b,r)
 			}
@@ -102,7 +102,7 @@ func move_fanout(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 		loc = loc.Add(game.South)
 		fut_pos = bt.robot_positions[loc]
 
-		if (r.Loc.Y >b.Center().Y &&  fut_pos ==pos_stats{} && b.LocType(loc)==game.Valid){
+		if (r.Loc.Y >=b.Center().Y &&  fut_pos ==pos_stats{} && b.LocType(loc)==game.Valid){
 			return game.Action{
 				Kind:      game.Move,
 				Direction: game.South,

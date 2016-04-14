@@ -9,6 +9,7 @@ type yboter struct{
 	self_prevHP map[uint32]int 				//decides  guard if under heavy attack
 	robot_positions map[game.Loc]pos_stats	//sync all bot actions for each round to avoid collisions
 	current_turn int 						//reini this board every turn
+	spawnside string
 }
 type pos_stats struct{
 	future_whats_here string
@@ -19,6 +20,8 @@ type pos_stats struct{
 func (bt *yboter) Act(b *game.Board, r *game.Robot) game.Action {
 	//init variables
 	init_yboter_states(bt,b,r)
+
+	//set the side of your spawn if its x>9 then its right
 	
 	//update oppoent
 	update_targets(bt ,b , r)
@@ -52,7 +55,7 @@ func ai_action(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 	}
 
 	//movement tatics
-	action = move_to_target(bt, b, r)
+	action = move_chain(bt, b, r)
 	if action.Kind != game.Wait{
 		print_action(&action)
 		update_future_position(bt, r, &action) 

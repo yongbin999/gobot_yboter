@@ -65,7 +65,8 @@ func off_attack(bt *yboter, b *game.Board, r *game.Robot) game.Action {
 			opp_bot := b.At(loc)
 			pos_bot := bt.robot_positions[opp_bot.Loc]
 
-			fmt.Printf("\n\t targerloc: %v enermy loc:%v stats:%v, act.HP%v \n",loc,opp_bot.Loc, pos_bot,opp_bot.Health)
+			fmt.Printf("\n\t my:%v opp:%v, \n",r.Faction, opp_bot.Faction)
+			fmt.Printf("\t targetloc:%v stats:%v, act.HP%v \n",loc, pos_bot,opp_bot.Health)
 
 			if pos_bot.future_health >0{
 				return game.Action{
@@ -87,8 +88,10 @@ func off_preattack(b *game.Board, r *game.Robot) game.Action {
 
 	direction_opp := direction_enermy(opp,r)
 
+	fmt.Printf(" targetloc:%v dist:%v ",opp.Loc,game.Distance(r.Loc, opp.Loc))
+	
 		//if enermy is marching toward you and attack
-	if game.Distance(r.Loc, opp.Loc) == 1 && count_friend_adj(b,opp) == 0{
+	if game.Distance(r.Loc, opp.Loc) == 2 && count_friend_adj(b,opp) == 0{
 
 		//fmt.Printf("opp :%v, ", opp)
 		return game.Action{
