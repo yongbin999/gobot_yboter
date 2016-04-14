@@ -23,6 +23,6 @@ all the main functions are split into files
 * attack module
 * movement module 
 
-i hide those modules from github, you can create those function with what every strategy you come up with.
+you can create your own function strategy and plug into the modules.
 
-if you want a copy of my modules, please send me an email and i'll walk you through it.
+if you want to know more about how it works, please send me an email and i'll walk you through it.
