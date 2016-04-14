@@ -22,3 +22,10 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+yboter_attack.go
+yboter_defend.go
+yboter_move.go
+
+
+
