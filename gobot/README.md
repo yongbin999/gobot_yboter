@@ -22,3 +22,7 @@ all the main functions are split into files
 * defense module
 * attack module
 * movement module 
+
+i hide those modules from github, you can create those function with what every strategy you come up with.
+
+if you want a copy of my modules, please send me an email and i'll walk you through it.

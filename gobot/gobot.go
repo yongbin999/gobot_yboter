@@ -54,7 +54,7 @@ exit status 1
 ///https://github.com/bcspragu/Gobots/blob/master/engine/replayer.go
 
 
-
+// would be cool to pause and display the current action for next round
 
 
 
